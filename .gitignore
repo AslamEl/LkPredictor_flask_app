@@ -12,7 +12,7 @@ venv/
 env/
 ENV/
 # Ignore saved models
-*.ipynb
+
 *.joblib
 *.Jupyter
 
@@ -39,3 +39,4 @@ ENV/
 # OS
 .DS_Store
 Thumbs.db
+DOCKER_HEROKU_DEPLOY.md
