@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sri Lanka House Price Predictor</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }
+        h1 { color: #333; }
+        .container { max-width: 500px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input, .form-group select { width: 95%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        .btn { background-color: #007BFF; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn:hover { background-color: #0056b3; }
+        h2 { color: #28a745; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Sri Lanka House Price Predictor</h1>
+    <p>Enter the house details to get a price estimate:</p>
+
+    <form action="{{ url_for('predict') }}" method="POST">
+        
+        <div class="form-group">
+            <label>Square Footage</label>
+            <input type="number" name="SquareFootage" placeholder="e.g., 1500" required>
+        </div>
+
+        <div class="form-group">
+            <label>Number of Bedrooms</label>
+            <input type="number" name="Bedrooms" placeholder="e.g., 3" required>
+        </div>
+
+        <div class="form-group">
+            <label>Location</label>
+            <select name="Location" required>
+                <option value="Suburb">Suburb</option>
+                <option value="Urban">Urban</option>
+                <option value="Rural">Rural</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn">Predict Price</button>
+    </form>
+
+    <h2>{{ prediction_text }}</h2>
+</div>
+
+</body>
+</html>

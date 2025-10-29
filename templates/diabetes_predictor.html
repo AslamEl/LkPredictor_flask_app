@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diabetes Predictor - LkPredictor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .result-animation {
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .input-focus:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .animate-slide-in {
+            animation: slideInRight 0.3s ease-out;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .sidebar-link {
+            transition: all 0.2s ease;
+        }
+        
+        .sidebar-link:hover {
+            background-color: rgba(102, 126, 234, 0.1);
+        }
+        
+        .sidebar-link.active {
+            background-color: rgba(102, 126, 234, 0.2);
+            border-left: 4px solid #667eea;
+        }
+        
+        .notification-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            margin-top: 0.5rem;
+            width: 320px;
+            max-height: 400px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            z-index: 50;
+        }
+        
+        .notification-dropdown.show {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg hidden md:block">
+            <div class="p-6 border-b">
+                <a href="/dashboard" class="flex items-center hover:opacity-80 transition cursor-pointer">
+                    <i class="fas fa-chart-line text-3xl text-purple-600"></i>
+                    <span class="ml-3 text-3xl font-bold text-gray-900">LkPredictor</span>
+                </a>
+            </div>
+            <nav class="p-4">
+                <a href="/dashboard" class="sidebar-link flex items-center p-3 rounded-lg mb-2">
+                    <i class="fas fa-th-large w-6"></i>
+                    <span class="ml-3 font-medium">Dashboard</span>
+                </a>
+                <a href="/house-predictor" class="sidebar-link flex items-center p-3 rounded-lg mb-2">
+                    <i class="fas fa-home w-6"></i>
+                    <span class="ml-3 font-medium">House Predictor</span>
+                </a>
+                <a href="/diabetes-predictor" class="sidebar-link active flex items-center p-3 rounded-lg mb-2">
+                    <i class="fas fa-heartbeat w-6"></i>
+                    <span class="ml-3 font-medium">Diabetes Check</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center p-3 rounded-lg mb-2 opacity-50 cursor-not-allowed">
+                    <i class="fas fa-car w-6"></i>
+                    <span class="ml-3 font-medium">Car Predictor</span>
+                    <span class="ml-auto text-xs bg-gray-200 px-2 py-1 rounded">Soon</span>
+                </a>
+                <div class="border-t my-4"></div>
+                <a href="/history" class="sidebar-link flex items-center p-3 rounded-lg mb-2">
+                    <i class="fas fa-history w-6"></i>
+                    <span class="ml-3 font-medium">History</span>
+                </a>
+                <a href="/settings" class="sidebar-link flex items-center p-3 rounded-lg mb-2">
+                    <i class="fas fa-cog w-6"></i>
+                    <span class="ml-3 font-medium">Settings</span>
+                </a>
+                <a href="#" onclick="logout()" class="sidebar-link flex items-center p-3 rounded-lg mb-2 text-red-600">
+                    <i class="fas fa-sign-out-alt w-6"></i>
+                    <span class="ml-3 font-medium">Logout</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="bg-white shadow-sm z-10">
+                <div class="px-6 py-4 flex justify-between items-center">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">Diabetes Risk Assessment</h1>
+                        <p class="text-gray-600">Check your diabetes risk based on health indicators</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <button onclick="toggleNotifications()" class="relative p-2 text-gray-600 hover:text-gray-900 transition">
+                                <i class="fas fa-bell text-xl"></i>
+                                <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+                            </button>
+                            
+                            <!-- Notification Dropdown -->
+                            <div id="notificationDropdown" class="notification-dropdown">
+                                <div class="p-4 border-b bg-gray-50">
+                                    <h3 class="font-semibold text-gray-900">Notifications</h3>
+                                </div>
+                                <div class="p-4">
+                                    <div class="space-y-3">
+                                        <!-- Sample notification -->
+                                        <div class="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg transition">
+                                            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                                <i class="fas fa-heartbeat text-purple-600"></i>
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm text-gray-900">Ready to check!</p>
+                                                <p class="text-xs text-gray-500 mt-1">Complete the health assessment form</p>
+                                                <p class="text-xs text-gray-400 mt-1">Just now</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-3 border-t bg-gray-50 text-center">
+                                    <a href="#" class="text-sm text-purple-600 hover:text-purple-700 font-medium">View all notifications</a>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="/settings" class="flex items-center hover:opacity-80 transition cursor-pointer">
+                            <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center text-white font-bold">
+                                <span id="userInitial">U</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="flex-1 overflow-y-auto p-6">
+                <div class="max-w-7xl mx-auto">
+        <!-- Assessment Form -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Form Panel -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-xl shadow-lg p-8">
+                    <div class="mb-6">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Health Information</h3>
+                        <p class="text-sm text-gray-600">Please answer all questions accurately for best results</p>
+                    </div>
+
+                    <form id="diabetesForm" onsubmit="submitForm(event)" class="space-y-6">
+                        <!-- BMI -->
+                        <div class="bg-purple-50 p-4 rounded-lg">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-weight text-purple-500 mr-2"></i>
+                                Body Mass Index (BMI) <span class="text-red-500">*</span>
+                            </label>
+                            <input type="number" name="BMI" step="0.1" min="10" max="100" required
+                                class="input-focus w-full px-4 py-2 border border-gray-300 rounded-lg"
+                                placeholder="e.g., 25.5">
+                            <p class="mt-1 text-xs text-gray-500">Calculate: weight(kg) / height(m)²</p>
+                        </div>
+
+                        <!-- Cardiovascular Health - Grid Layout -->
+                        <div class="bg-red-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-gray-900 mb-3">
+                                <i class="fas fa-heartbeat text-red-500 mr-2"></i>
+                                Cardiovascular Health
+                            </h4>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">High Blood Pressure?</label>
+                                    <div class="flex gap-3">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="HighBP" value="0" required class="mr-1">
+                                            <span class="text-sm">No</span>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="HighBP" value="1" required class="mr-1">
+                                            <span class="text-sm">Yes</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">High Cholesterol?</label>
+                                    <div class="flex gap-3">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="HighChol" value="0" required class="mr-1">
+                                            <span class="text-sm">No</span>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="HighChol" value="1" required class="mr-1">
+                                            <span class="text-sm">Yes</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Cholesterol Check (5yr)?</label>
+                                    <div class="flex gap-3">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="CholCheck" value="0" required class="mr-1">
+                                            <span class="text-sm">No</span>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="CholCheck" value="1" required class="mr-1">
+                                            <span class="text-sm">Yes</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Medical History - Grid Layout -->
+                        <div class="bg-red-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-gray-900 mb-3">
+                                <i class="fas fa-hospital text-red-500 mr-2"></i>
+                                Medical History
+                            </h4>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Ever Had a Stroke?</label>
+                                    <div class="flex gap-3">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="Stroke" value="0" required class="mr-1">
+                                            <span class="text-sm">No</span>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="Stroke" value="1" required class="mr-1">
+                                            <span class="text-sm">Yes</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Heart Disease/Attack?</label>
+                                    <div class="flex gap-3">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="HeartDiseaseorAttack" value="0" required class="mr-1">
+                                            <span class="text-sm">No</span>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="HeartDiseaseorAttack" value="1" required class="mr-1">
+                                            <span class="text-sm">Yes</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lifestyle Habits - Grid Layout -->
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-gray-900 mb-3">
+                                <i class="fas fa-running text-blue-500 mr-2"></i>
+                                Lifestyle & Habits
+                            </h4>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Smoker? (100+ cigarettes)</label>
+                                    <div class="flex gap-3">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="Smoker" value="0" required class="mr-1">
+                                            <span class="text-sm">No</span>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="Smoker" value="1" required class="mr-1">
+                                            <span class="text-sm">Yes</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Physical Activity (30 days)?</label>
+                                    <div class="flex gap-3">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="PhysActivity" value="0" required class="mr-1">
+                                            <span class="text-sm">No</span>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="PhysActivity" value="1" required class="mr-1">
+                                            <span class="text-sm">Yes</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Diet - Grid Layout -->
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-gray-900 mb-3">
+                                <i class="fas fa-apple-alt text-green-500 mr-2"></i>
+                                Diet & Nutrition
+                            </h4>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Fruits Daily?</label>
+                                    <div class="flex gap-3">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="Fruits" value="0" required class="mr-1">
+                                            <span class="text-sm">No</span>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="Fruits" value="1" required class="mr-1">
+                                            <span class="text-sm">Yes</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Vegetables Daily?</label>
+                                    <div class="flex gap-3">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="Veggies" value="0" required class="mr-1">
+                                            <span class="text-sm">No</span>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="Veggies" value="1" required class="mr-1">
+                                            <span class="text-sm">Yes</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Heavy Alcohol Use?</label>
+                                    <div class="flex gap-3">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="HvyAlcoholConsump" value="0" required class="mr-1">
+                                            <span class="text-sm">No</span>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="HvyAlcoholConsump" value="1" required class="mr-1">
+                                            <span class="text-sm">Yes</span>
+                                        </label>
+                                    </div>
+                                    <p class="mt-1 text-xs text-gray-500">M: ≥14/wk, F: ≥7/wk</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Healthcare Access - Grid Layout -->
+                        <div class="bg-indigo-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-gray-900 mb-3">
+                                <i class="fas fa-user-md text-indigo-500 mr-2"></i>
+                                Healthcare Access
+                            </h4>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Have Healthcare Coverage?</label>
+                                    <div class="flex gap-3">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="AnyHealthcare" value="0" required class="mr-1">
+                                            <span class="text-sm">No</span>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="AnyHealthcare" value="1" required class="mr-1">
+                                            <span class="text-sm">Yes</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Couldn't See Doctor (Cost)?</label>
+                                    <div class="flex gap-3">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="NoDocbcCost" value="0" required class="mr-1">
+                                            <span class="text-sm">No</span>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="NoDocbcCost" value="1" required class="mr-1">
+                                            <span class="text-sm">Yes</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Health Status - Compact -->
+                        <div class="bg-teal-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-gray-900 mb-3">
+                                <i class="fas fa-notes-medical text-teal-500 mr-2"></i>
+                                Health Status
+                            </h4>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">General Health</label>
+                                    <select name="GenHlth" required class="input-focus w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                        <option value="">Select...</option>
+                                        <option value="1">Excellent</option>
+                                        <option value="2">Very Good</option>
+                                        <option value="3">Good</option>
+                                        <option value="4">Fair</option>
+                                        <option value="5">Poor</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Difficulty Walking?</label>
+                                    <div class="flex gap-3 mt-2">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="DiffWalk" value="0" required class="mr-1">
+                                            <span class="text-sm">No</span>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="DiffWalk" value="1" required class="mr-1">
+                                            <span class="text-sm">Yes</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Poor Mental Health Days (0-30)</label>
+                                    <input type="number" name="MentHlth" min="0" max="30" required
+                                        class="input-focus w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                        placeholder="0-30">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Physical Illness Days (0-30)</label>
+                                    <input type="number" name="PhysHlth" min="0" max="30" required
+                                        class="input-focus w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                        placeholder="0-30">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Demographics - Compact -->
+                        <div class="bg-purple-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-gray-900 mb-3">
+                                <i class="fas fa-user text-purple-500 mr-2"></i>
+                                Demographics
+                            </h4>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Sex</label>
+                                    <div class="flex gap-3">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="Sex" value="0" required class="mr-1">
+                                            <span class="text-sm">Female</span>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="Sex" value="1" required class="mr-1">
+                                            <span class="text-sm">Male</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Age Group</label>
+                                    <select name="Age" required class="input-focus w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                        <option value="">Select...</option>
+                                        <option value="1">18-24</option>
+                                        <option value="2">25-29</option>
+                                        <option value="3">30-34</option>
+                                        <option value="4">35-39</option>
+                                        <option value="5">40-44</option>
+                                        <option value="6">45-49</option>
+                                        <option value="7">50-54</option>
+                                        <option value="8">55-59</option>
+                                        <option value="9">60-64</option>
+                                        <option value="10">65-69</option>
+                                        <option value="11">70-74</option>
+                                        <option value="12">75-79</option>
+                                        <option value="13">80+</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Education Level</label>
+                                    <select name="Education" required class="input-focus w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                        <option value="">Select...</option>
+                                        <option value="1">Elementary or less</option>
+                                        <option value="2">Some high school</option>
+                                        <option value="3">High school graduate</option>
+                                        <option value="4">Some college</option>
+                                        <option value="5">College graduate</option>
+                                        <option value="6">Graduate degree</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Annual Income</label>
+                                    <select name="Income" required class="input-focus w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                        <option value="">Select...</option>
+                                        <option value="1">&lt; $10,000</option>
+                                        <option value="2">$10,000 - $15,000</option>
+                                        <option value="3">$15,000 - $20,000</option>
+                                        <option value="4">$20,000 - $25,000</option>
+                                        <option value="5">$25,000 - $35,000</option>
+                                        <option value="6">$35,000 - $50,000</option>
+                                        <option value="7">$50,000 - $75,000</option>
+                                        <option value="8">$75,000+</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                            <button type="submit" class="w-full gradient-bg text-white py-3 px-6 rounded-lg font-semibold hover:opacity-90 transition">
+                                <i class="fas fa-heartbeat mr-2"></i>
+                                Check Diabetes Risk
+                            </button>
+
+                            <button type="button" onclick="resetForm()" class="w-full bg-gray-200 text-gray-700 py-3 px-6 rounded-lg font-semibold hover:bg-gray-300 transition">
+                                <i class="fas fa-redo mr-2"></i>
+                                Reset Form
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Results Panel -->
+            <div>
+                <!-- Info Card -->
+                <div id="infoCard" class="bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl shadow-lg p-6 text-white mb-6">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-info-circle text-2xl mr-3"></i>
+                        <h3 class="text-xl font-bold">About This Test</h3>
+                    </div>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle mt-1 mr-2"></i>
+                            <span>Based on CDC health indicators</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle mt-1 mr-2"></i>
+                            <span>AI-powered risk assessment</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle mt-1 mr-2"></i>
+                            <span>Results in seconds</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-exclamation-triangle mt-1 mr-2"></i>
+                            <span>Not a medical diagnosis - consult a doctor</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Results Card -->
+                <div id="resultsCard" class="hidden bg-white rounded-xl shadow-lg p-6 result-animation">
+                    <div id="shareCard" class="bg-white p-6 rounded-xl">
+                        <div class="text-center mb-4">
+                            <i id="resultIcon" class="fas fa-heartbeat text-6xl mb-4"></i>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-2">Diabetes Risk Assessment</h3>
+                            <p class="text-sm text-gray-500">LkPredictor Health Analytics</p>
+                        </div>
+
+                        <div id="resultContent" class="rounded-lg p-6 mb-6 text-center">
+                            <div class="text-sm text-gray-600 mb-2">Risk Level</div>
+                            <div id="resultText" class="text-3xl font-bold mb-2"></div>
+                            <div id="confidenceText" class="text-sm text-gray-600"></div>
+                        </div>
+
+                        <!-- Probabilities -->
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-600">No Diabetes</span>
+                                    <span id="prob0" class="font-semibold">-</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div id="bar0" class="bg-green-500 h-2 rounded-full" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-600">Prediabetes</span>
+                                    <span id="prob1" class="font-semibold">-</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div id="bar1" class="bg-yellow-500 h-2 rounded-full" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-600">Diabetes</span>
+                                    <span id="prob2" class="font-semibold">-</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div id="bar2" class="bg-red-500 h-2 rounded-full" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="border-t pt-6 space-y-3">
+                        <button onclick="sharePrediction()" class="w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 transition font-semibold">
+                            <i class="fas fa-share-alt mr-2"></i>Share Results
+                        </button>
+                        <button onclick="resetForm()" class="w-full bg-gray-200 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-300 transition font-semibold">
+                            <i class="fas fa-redo mr-2"></i>New Assessment
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Loading Card -->
+                <div id="loadingCard" class="hidden bg-white rounded-xl shadow-lg p-8">
+                    <div class="text-center">
+                        <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Analyzing Data...</h3>
+                        <p class="text-gray-600">Our AI is assessing your health risk</p>
+                    </div>
+                </div>
+
+                <!-- Error Card -->
+                <div id="errorCard" class="hidden bg-red-50 rounded-xl shadow-lg p-8 result-animation">
+                    <div class="text-center">
+                        <i class="fas fa-exclamation-circle text-6xl text-red-500 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Assessment Failed</h3>
+                        <p id="errorMessage" class="text-gray-600 mb-4">An error occurred. Please try again.</p>
+                        <button onclick="resetForm()" class="bg-red-600 text-white py-2 px-6 rounded-lg hover:bg-red-700 transition">
+                            Try Again
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPrediction = null;
+
+        // Toggle notifications dropdown
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notificationDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // Close notification when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('notificationDropdown');
+            const button = event.target.closest('button[onclick="toggleNotifications()"]');
+            if (!button && !dropdown.contains(event.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        // Submit form
+        async function submitForm(event) {
+            event.preventDefault();
+            
+            // Hide all cards
+            document.getElementById('infoCard').classList.add('hidden');
+            document.getElementById('resultsCard').classList.add('hidden');
+            document.getElementById('errorCard').classList.add('hidden');
+            document.getElementById('loadingCard').classList.remove('hidden');
+            
+            const formData = new FormData(event.target);
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = parseFloat(value);
+            });
+            
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/predict/diabetes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                document.getElementById('loadingCard').classList.add('hidden');
+                
+                if (result.success) {
+                    // Store current prediction
+                    currentPrediction = {
+                        result: result.result,
+                        confidence: result.confidence,
+                        probabilities: result.probabilities,
+                        prediction_id: result.prediction_id
+                    };
+                    
+                    // Update result card
+                    const resultIcon = document.getElementById('resultIcon');
+                    const resultContent = document.getElementById('resultContent');
+                    const resultText = document.getElementById('resultText');
+                    const confidenceText = document.getElementById('confidenceText');
+                    
+                    // Set colors and icons based on result
+                    if (result.prediction === 0) {
+                        resultIcon.className = 'fas fa-check-circle text-6xl text-green-500 mb-4';
+                        resultContent.className = 'bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 mb-6 text-center';
+                        resultText.className = 'text-3xl font-bold mb-2 text-green-700';
+                    } else if (result.prediction === 1) {
+                        resultIcon.className = 'fas fa-exclamation-triangle text-6xl text-yellow-500 mb-4';
+                        resultContent.className = 'bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg p-6 mb-6 text-center';
+                        resultText.className = 'text-3xl font-bold mb-2 text-yellow-700';
+                    } else {
+                        resultIcon.className = 'fas fa-heart-broken text-6xl text-red-500 mb-4';
+                        resultContent.className = 'bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-6 mb-6 text-center';
+                        resultText.className = 'text-3xl font-bold mb-2 text-red-700';
+                    }
+                    
+                    resultText.textContent = result.result;
+                    confidenceText.textContent = `Confidence: ${result.confidence.toFixed(1)}%`;
+                    
+                    // Update probability bars
+                    document.getElementById('prob0').textContent = `${result.probabilities.no_diabetes.toFixed(1)}%`;
+                    document.getElementById('bar0').style.width = `${result.probabilities.no_diabetes}%`;
+                    
+                    document.getElementById('prob1').textContent = `${result.probabilities.prediabetes.toFixed(1)}%`;
+                    document.getElementById('bar1').style.width = `${result.probabilities.prediabetes}%`;
+                    
+                    document.getElementById('prob2').textContent = `${result.probabilities.diabetes.toFixed(1)}%`;
+                    document.getElementById('bar2').style.width = `${result.probabilities.diabetes}%`;
+                    
+                    document.getElementById('resultsCard').classList.remove('hidden');
+                    
+                    // Scroll to results smoothly
+                    setTimeout(() => {
+                        document.getElementById('resultsCard').scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'nearest' 
+                        });
+                    }, 100);
+                } else {
+                    document.getElementById('errorMessage').textContent = result.message;
+                    document.getElementById('errorCard').classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loadingCard').classList.add('hidden');
+                document.getElementById('errorMessage').textContent = 'Network error. Please try again.';
+                document.getElementById('errorCard').classList.remove('hidden');
+            }
+        }
+
+        // Reset form
+        function resetForm() {
+            document.getElementById('diabetesForm').reset();
+            document.getElementById('infoCard').classList.remove('hidden');
+            document.getElementById('resultsCard').classList.add('hidden');
+            document.getElementById('errorCard').classList.add('hidden');
+            document.getElementById('loadingCard').classList.add('hidden');
+            currentPrediction = null;
+            
+            // Scroll to form smoothly
+            setTimeout(() => {
+                document.getElementById('diabetesForm').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            }, 100);
+        }
+
+        // Share prediction
+        function sharePrediction() {
+            if (!currentPrediction) {
+                alert('No prediction to share');
+                return;
+            }
+            
+            // Create modal
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-8 relative animate-slide-in">
+                    <button onclick="this.closest('.fixed').remove()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-share-alt text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2">Share Your Results</h3>
+                        <p class="text-gray-600">Choose how you want to share your diabetes risk assessment</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <button onclick="downloadAsImage()" class="bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 transition font-semibold">
+                            <i class="fas fa-download mr-2"></i>Save as Image
+                        </button>
+                        <button onclick="copyFromModal()" class="bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition font-semibold">
+                            <i class="fas fa-copy mr-2"></i>Copy Text
+                        </button>
+                    </div>
+                    
+                    <button onclick="this.closest('.fixed').remove()" class="w-full mt-3 bg-gray-200 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-300 transition font-semibold">
+                        Close
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // Copy text from modal
+        function copyFromModal() {
+            const shareText = `🩺 Diabetes Risk Assessment - LkPredictor\n\n` +
+                `Result: ${currentPrediction.result}\n` +
+                `Confidence: ${currentPrediction.confidence.toFixed(1)}%\n\n` +
+                `Risk Probabilities:\n` +
+                `✅ No Diabetes: ${currentPrediction.probabilities.no_diabetes.toFixed(1)}%\n` +
+                `⚠️ Prediabetes: ${currentPrediction.probabilities.prediabetes.toFixed(1)}%\n` +
+                `❌ Diabetes: ${currentPrediction.probabilities.diabetes.toFixed(1)}%\n\n` +
+                `Get your own assessment at LkPredictor!`;
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(shareText)
+                    .then(() => {
+                        showNotification('Copied!', 'Assessment results copied to clipboard', 'success');
+                    })
+                    .catch((error) => {
+                        console.error('Error copying:', error);
+                        alert('Failed to copy to clipboard');
+                    });
+            } else {
+                alert('Clipboard not supported');
+            }
+        }
+
+        // Download as image using html2canvas
+        async function downloadAsImage() {
+            const card = document.getElementById('shareCard');
+            const button = event.target;
+            const originalContent = button.innerHTML;
+            
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating...';
+            
+            try {
+                // Generate canvas from the card with better quality
+                const canvas = await html2canvas(card, {
+                    backgroundColor: '#ffffff',
+                    scale: 3, // Higher quality
+                    logging: false,
+                    useCORS: true,
+                    allowTaint: true,
+                    windowWidth: card.scrollWidth,
+                    windowHeight: card.scrollHeight,
+                    imageTimeout: 0,
+                    removeContainer: true
+                });
+                
+                // Convert to blob and download with maximum quality
+                canvas.toBlob((blob) => {
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.download = `diabetes-assessment-${Date.now()}.png`;
+                    link.href = url;
+                    link.click();
+                    URL.revokeObjectURL(url);
+                    
+                    button.disabled = false;
+                    button.innerHTML = originalContent;
+                    showNotification('Success!', 'Image downloaded successfully', 'success');
+                }, 'image/png', 1.0);
+                
+            } catch (error) {
+                console.error('Error generating image:', error);
+                button.disabled = false;
+                button.innerHTML = originalContent;
+                alert('Failed to generate image. Please try again.');
+            }
+        }
+
+        // Show notification
+        function showNotification(title, message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 max-w-sm bg-white rounded-lg shadow-lg p-4 border-l-4 ${
+                type === 'success' ? 'border-green-500' : 
+                type === 'error' ? 'border-red-500' : 
+                'border-blue-500'
+            } animate-slide-in`;
+            
+            notification.innerHTML = `
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-${
+                            type === 'success' ? 'check-circle text-green-500' : 
+                            type === 'error' ? 'exclamation-circle text-red-500' : 
+                            'info-circle text-blue-500'
+                        } text-xl"></i>
+                    </div>
+                    <div class="ml-3 flex-1">
+                        <p class="text-sm font-semibold text-gray-900">${title}</p>
+                        <p class="text-sm text-gray-600 mt-1">${message}</p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('token');
+            document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            window.location.href = '/login';
+        }
+        
+        // Set user initial
+        document.addEventListener('DOMContentLoaded', function() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (user.name) {
+                const initial = user.name.charAt(0).toUpperCase();
+                const userInitialElement = document.getElementById('userInitial');
+                if (userInitialElement) {
+                    userInitialElement.textContent = initial;
+                }
+            }
+        });
+    </script>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

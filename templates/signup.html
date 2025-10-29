@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - LkPredictor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .input-focus:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .password-strength {
+            height: 4px;
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex">
+        <!-- Left Side - Image/Gradient -->
+        <div class="hidden lg:block relative w-0 flex-1">
+            <div class="absolute inset-0 gradient-bg">
+                <div class="h-full w-full flex items-center justify-center p-12">
+                    <div class="text-white text-center">
+                        <i class="fas fa-rocket text-8xl mb-8 opacity-80"></i>
+                        <h2 class="text-4xl font-bold mb-4">Start Your Journey</h2>
+                        <p class="text-xl opacity-90">Join thousands of users making smarter decisions</p>
+                        <div class="mt-12 space-y-6">
+                            <div class="flex items-center text-left">
+                                <i class="fas fa-check-circle text-3xl mr-4"></i>
+                                <div>
+                                    <div class="font-semibold text-lg">Free to Start</div>
+                                    <div class="text-sm opacity-75">No credit card required</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center text-left">
+                                <i class="fas fa-check-circle text-3xl mr-4"></i>
+                                <div>
+                                    <div class="font-semibold text-lg">Instant Access</div>
+                                    <div class="text-sm opacity-75">Start predicting immediately</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center text-left">
+                                <i class="fas fa-check-circle text-3xl mr-4"></i>
+                                <div>
+                                    <div class="font-semibold text-lg">Secure & Private</div>
+                                    <div class="text-sm opacity-75">Your data is protected</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side - Form -->
+        <div class="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+            <div class="max-w-md w-full space-y-8 py-12">
+                <!-- Logo -->
+                <div class="text-center">
+                    <a href="/" class="inline-flex items-center justify-center">
+                        <i class="fas fa-chart-line text-4xl text-purple-600"></i>
+                        <span class="ml-2 text-3xl font-bold text-gray-900">LkPredictor</span>
+                    </a>
+                    <h2 class="mt-6 text-3xl font-bold text-gray-900">Create your account</h2>
+                    <p class="mt-2 text-gray-600">Start making predictions in minutes</p>
+                </div>
+
+                <!-- Alert Messages -->
+                <div id="alert" class="hidden rounded-lg p-4 mb-4"></div>
+
+                <!-- Signup Form -->
+                <form id="signupForm" class="mt-8 space-y-6">
+                    <div class="space-y-4">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                                Full Name
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-user text-gray-400"></i>
+                                </div>
+                                <input
+                                    id="name"
+                                    name="name"
+                                    type="text"
+                                    required
+                                    class="input-focus appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none transition"
+                                    placeholder="John Doe"
+                                >
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                                Email Address
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-envelope text-gray-400"></i>
+                                </div>
+                                <input
+                                    id="email"
+                                    name="email"
+                                    type="email"
+                                    required
+                                    class="input-focus appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none transition"
+                                    placeholder="you@example.com"
+                                >
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                                Password
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-lock text-gray-400"></i>
+                                </div>
+                                <input
+                                    id="password"
+                                    name="password"
+                                    type="password"
+                                    required
+                                    minlength="8"
+                                    class="input-focus appearance-none block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none transition"
+                                    placeholder="••••••••"
+                                    oninput="checkPasswordStrength()"
+                                >
+                                <button
+                                    type="button"
+                                    onclick="togglePassword('password')"
+                                    class="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                >
+                                    <i id="toggleIcon1" class="fas fa-eye text-gray-400 hover:text-gray-600"></i>
+                                </button>
+                            </div>
+                            <div class="mt-2 flex space-x-1">
+                                <div id="strength1" class="password-strength flex-1 bg-gray-200 rounded"></div>
+                                <div id="strength2" class="password-strength flex-1 bg-gray-200 rounded"></div>
+                                <div id="strength3" class="password-strength flex-1 bg-gray-200 rounded"></div>
+                                <div id="strength4" class="password-strength flex-1 bg-gray-200 rounded"></div>
+                            </div>
+                            <p id="strengthText" class="mt-1 text-xs text-gray-500">Use 8+ characters with a mix of letters, numbers & symbols</p>
+                        </div>
+
+                        <div>
+                            <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">
+                                Confirm Password
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-lock text-gray-400"></i>
+                                </div>
+                                <input
+                                    id="confirmPassword"
+                                    name="confirmPassword"
+                                    type="password"
+                                    required
+                                    class="input-focus appearance-none block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none transition"
+                                    placeholder="••••••••"
+                                >
+                                <button
+                                    type="button"
+                                    onclick="togglePassword('confirmPassword')"
+                                    class="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                >
+                                    <i id="toggleIcon2" class="fas fa-eye text-gray-400 hover:text-gray-600"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center">
+                        <input
+                            id="terms"
+                            name="terms"
+                            type="checkbox"
+                            required
+                            class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                        >
+                        <label for="terms" class="ml-2 block text-sm text-gray-700">
+                            I agree to the <a href="#" class="text-purple-600 hover:text-purple-500">Terms</a> and <a href="#" class="text-purple-600 hover:text-purple-500">Privacy Policy</a>
+                        </label>
+                    </div>
+
+                    <div>
+                        <button
+                            type="submit"
+                            class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white gradient-bg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition"
+                        >
+                            <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                                <i class="fas fa-user-plus"></i>
+                            </span>
+                            Create Account
+                        </button>
+                    </div>
+
+                    <div class="text-center">
+                        <p class="text-sm text-gray-600">
+                            Already have an account?
+                            <a href="/login" class="font-medium text-purple-600 hover:text-purple-500">
+                                Sign in
+                            </a>
+                        </p>
+                    </div>
+                </form>
+
+                <!-- Social Signup (Optional) -->
+                <div class="mt-6">
+                    <div class="relative">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-gray-300"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-2 bg-gray-50 text-gray-500">Or sign up with</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 grid grid-cols-2 gap-3">
+                        <button class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                            <i class="fab fa-google text-xl"></i>
+                            <span class="ml-2">Google</span>
+                        </button>
+                        <button class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                            <i class="fab fa-facebook text-xl"></i>
+                            <span class="ml-2">Facebook</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword(fieldId) {
+            const passwordInput = document.getElementById(fieldId);
+            const toggleIcon = document.getElementById(fieldId === 'password' ? 'toggleIcon1' : 'toggleIcon2');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        function checkPasswordStrength() {
+            const password = document.getElementById('password').value;
+            const strengthBars = [
+                document.getElementById('strength1'),
+                document.getElementById('strength2'),
+                document.getElementById('strength3'),
+                document.getElementById('strength4')
+            ];
+            const strengthText = document.getElementById('strengthText');
+            
+            let strength = 0;
+            
+            if (password.length >= 8) strength++;
+            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
+            if (password.match(/[0-9]/)) strength++;
+            if (password.match(/[^a-zA-Z0-9]/)) strength++;
+            
+            strengthBars.forEach((bar, index) => {
+                if (index < strength) {
+                    if (strength === 1) {
+                        bar.style.backgroundColor = '#ef4444';
+                    } else if (strength === 2) {
+                        bar.style.backgroundColor = '#f59e0b';
+                    } else if (strength === 3) {
+                        bar.style.backgroundColor = '#3b82f6';
+                    } else if (strength === 4) {
+                        bar.style.backgroundColor = '#10b981';
+                    }
+                } else {
+                    bar.style.backgroundColor = '#e5e7eb';
+                }
+            });
+            
+            const strengthLabels = ['Weak', 'Fair', 'Good', 'Strong'];
+            const strengthColors = ['text-red-600', 'text-orange-600', 'text-blue-600', 'text-green-600'];
+            
+            if (password.length > 0) {
+                strengthText.textContent = `Password strength: ${strengthLabels[strength - 1] || 'Too weak'}`;
+                strengthText.className = `mt-1 text-xs ${strengthColors[strength - 1] || 'text-red-600'}`;
+            } else {
+                strengthText.textContent = 'Use 8+ characters with a mix of letters, numbers & symbols';
+                strengthText.className = 'mt-1 text-xs text-gray-500';
+            }
+        }
+
+        function showAlert(message, type = 'error') {
+            const alert = document.getElementById('alert');
+            alert.className = `rounded-lg p-4 mb-4 ${type === 'error' ? 'bg-red-50 text-red-800' : 'bg-green-50 text-green-800'}`;
+            alert.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'} mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            alert.classList.remove('hidden');
+        }
+
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            
+            if (password !== confirmPassword) {
+                showAlert('Passwords do not match!');
+                return;
+            }
+            
+            if (password.length < 8) {
+                showAlert('Password must be at least 8 characters long!');
+                return;
+            }
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating account...';
+            
+            try {
+                const response = await fetch('/api/auth/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name, email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Store token in localStorage
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    // Also set token as cookie for server-side authentication
+                    document.cookie = `token=${data.token}; path=/; max-age=3600; SameSite=Strict`;
+                    
+                    showAlert('Account created successfully! Redirecting...', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 1000);
+                } else {
+                    showAlert(data.message || 'Signup failed. Please try again.');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<span class="absolute left-0 inset-y-0 flex items-center pl-3"><i class="fas fa-user-plus"></i></span>Create Account';
+                }
+            } catch (error) {
+                showAlert('An error occurred. Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span class="absolute left-0 inset-y-0 flex items-center pl-3"><i class="fas fa-user-plus"></i></span>Create Account';
+            }
+        });
+    </script>
+</body>
+</html>

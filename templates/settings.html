@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - LkPredictor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .sidebar-link {
+            transition: all 0.2s ease;
+        }
+        
+        .sidebar-link:hover {
+            background-color: rgba(102, 126, 234, 0.1);
+        }
+        
+        .sidebar-link.active {
+            background-color: rgba(102, 126, 234, 0.2);
+            border-left: 4px solid #667eea;
+        }
+        
+        .input-focus:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .notification-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            margin-top: 0.5rem;
+            width: 320px;
+            max-height: 400px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            z-index: 50;
+        }
+        
+        .notification-dropdown.show {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg hidden md:block">
+            <div class="p-6 border-b">
+                <a href="/dashboard" class="flex items-center hover:opacity-80 transition cursor-pointer">
+                    <i class="fas fa-chart-line text-3xl text-purple-600"></i>
+                    <span class="ml-3 text-3xl font-bold text-gray-900">LkPredictor</span>
+                </a>
+            </div>
+            <nav class="p-4">
+                <a href="/dashboard" class="sidebar-link flex items-center p-3 rounded-lg mb-2">
+                    <i class="fas fa-home w-6"></i>
+                    <span class="ml-3 font-medium">Dashboard</span>
+                </a>
+                <a href="/house-predictor" class="sidebar-link flex items-center p-3 rounded-lg mb-2">
+                    <i class="fas fa-home w-6"></i>
+                    <span class="ml-3 font-medium">House Predictor</span>
+                </a>
+                <a href="/diabetes-predictor" class="sidebar-link flex items-center p-3 rounded-lg mb-2">
+                    <i class="fas fa-heartbeat w-6"></i>
+                    <span class="ml-3 font-medium">Diabetes Check</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center p-3 rounded-lg mb-2 opacity-50 cursor-not-allowed">
+                    <i class="fas fa-car w-6"></i>
+                    <span class="ml-3 font-medium">Car Predictor</span>
+                    <span class="ml-auto text-xs bg-gray-200 px-2 py-1 rounded">Soon</span>
+                </a>
+                <div class="border-t my-4"></div>
+                <a href="/history" class="sidebar-link flex items-center p-3 rounded-lg mb-2">
+                    <i class="fas fa-history w-6"></i>
+                    <span class="ml-3 font-medium">History</span>
+                </a>
+                <a href="/settings" class="sidebar-link active flex items-center p-3 rounded-lg mb-2">
+                    <i class="fas fa-cog w-6"></i>
+                    <span class="ml-3 font-medium">Settings</span>
+                </a>
+                <a href="#" onclick="logout()" class="sidebar-link flex items-center p-3 rounded-lg mb-2 text-red-600">
+                    <i class="fas fa-sign-out-alt w-6"></i>
+                    <span class="ml-3 font-medium">Logout</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="bg-white shadow-sm z-10">
+                <div class="px-6 py-4 flex justify-between items-center">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">Settings</h1>
+                        <p class="text-gray-600">Manage your account settings</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <button onclick="toggleNotifications()" class="relative p-2 text-gray-600 hover:text-gray-900 transition">
+                                <i class="fas fa-bell text-xl"></i>
+                                <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+                            </button>
+                            
+                            <!-- Notification Dropdown -->
+                            <div id="notificationDropdown" class="notification-dropdown">
+                                <div class="p-4 border-b bg-gray-50">
+                                    <h3 class="font-semibold text-gray-900">Notifications</h3>
+                                </div>
+                                <div class="p-4">
+                                    <div class="space-y-3">
+                                        <!-- Sample notification -->
+                                        <div class="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg transition">
+                                            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                                <i class="fas fa-cog text-purple-600"></i>
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm text-gray-900">Account Settings</p>
+                                                <p class="text-xs text-gray-500 mt-1">Update your profile information</p>
+                                                <p class="text-xs text-gray-400 mt-1">Just now</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-3 border-t bg-gray-50 text-center">
+                                    <a href="#" class="text-sm text-purple-600 hover:text-purple-700 font-medium">View all notifications</a>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="/settings" class="flex items-center hover:opacity-80 transition cursor-pointer">
+                            <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center text-white font-bold">
+                                <span id="userInitial">U</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="flex-1 overflow-y-auto p-6">
+                <div class="max-w-4xl mx-auto space-y-6">
+                    <!-- Profile Settings -->
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                        <div class="p-6 border-b bg-gradient-to-r from-purple-50 to-blue-50">
+                            <h2 class="text-xl font-bold text-gray-900 flex items-center">
+                                <i class="fas fa-user-circle mr-2"></i>
+                                Profile Information
+                            </h2>
+                            <p class="text-gray-600 text-sm mt-1">Update your personal information</p>
+                        </div>
+                        
+                        <div class="p-6">
+                            <!-- Alert -->
+                            <div id="profileAlert" class="hidden rounded-lg p-4 mb-4"></div>
+                            
+                            <form id="profileForm" class="space-y-4">
+                                <div>
+                                    <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Full Name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="name"
+                                        name="name"
+                                        required
+                                        class="input-focus appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none transition"
+                                        placeholder="Your name"
+                                    >
+                                </div>
+                                
+                                <div>
+                                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Email Address
+                                    </label>
+                                    <input
+                                        type="email"
+                                        id="email"
+                                        name="email"
+                                        disabled
+                                        class="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
+                                        placeholder="your@email.com"
+                                    >
+                                    <p class="mt-1 text-xs text-gray-500">Email cannot be changed</p>
+                                </div>
+                                
+                                <div class="flex justify-end">
+                                    <button
+                                        type="submit"
+                                        class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition font-medium"
+                                    >
+                                        <i class="fas fa-save mr-2"></i>Save Changes
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Account Statistics -->
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                        <div class="p-6 border-b bg-gradient-to-r from-blue-50 to-green-50">
+                            <h2 class="text-xl font-bold text-gray-900 flex items-center">
+                                <i class="fas fa-chart-bar mr-2"></i>
+                                Account Statistics
+                            </h2>
+                            <p class="text-gray-600 text-sm mt-1">Your account overview</p>
+                        </div>
+                        
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="flex items-center p-4 bg-purple-50 rounded-lg">
+                                    <div class="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center text-white mr-4">
+                                        <i class="fas fa-calendar-alt text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-600">Member Since</p>
+                                        <p class="text-lg font-bold text-gray-900" id="memberSince">-</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center p-4 bg-blue-50 rounded-lg">
+                                    <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center text-white mr-4">
+                                        <i class="fas fa-chart-line text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-600">Total Predictions</p>
+                                        <p class="text-lg font-bold text-gray-900" id="totalPredictions">0</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Danger Zone -->
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden border-2 border-red-200">
+                        <div class="p-6 border-b bg-red-50">
+                            <h2 class="text-xl font-bold text-red-900 flex items-center">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>
+                                Danger Zone
+                            </h2>
+                            <p class="text-red-700 text-sm mt-1">Irreversible actions</p>
+                        </div>
+                        
+                        <div class="p-6">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900">Delete Account</h3>
+                                    <p class="text-gray-600 mt-1">
+                                        Once you delete your account, there is no going back. This will permanently delete your account and all associated data including prediction history.
+                                    </p>
+                                </div>
+                                <button
+                                    onclick="confirmDeleteAccount()"
+                                    class="ml-4 bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition font-medium whitespace-nowrap"
+                                >
+                                    <i class="fas fa-trash-alt mr-2"></i>Delete Account
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md mx-4">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-exclamation-triangle text-3xl text-red-600"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">Delete Account?</h3>
+                <p class="text-gray-600 mb-6">
+                    This action cannot be undone. All your data including prediction history will be permanently deleted.
+                </p>
+                <div class="flex space-x-3">
+                    <button
+                        onclick="closeDeleteModal()"
+                        class="flex-1 bg-gray-200 text-gray-800 px-4 py-3 rounded-lg hover:bg-gray-300 transition font-medium"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onclick="deleteAccount()"
+                        class="flex-1 bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 transition font-medium"
+                    >
+                        Delete Forever
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load user info
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            window.location.href = '/login';
+        }
+
+        if (user.name) {
+            document.getElementById('userInitial').textContent = user.name.charAt(0).toUpperCase();
+            document.getElementById('name').value = user.name;
+        }
+
+        if (user.email) {
+            document.getElementById('email').value = user.email;
+        }
+
+        if (user.created_at) {
+            const date = new Date(user.created_at);
+            document.getElementById('memberSince').textContent = date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        // Load stats
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/user/stats', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('totalPredictions').textContent = data.stats.total_predictions;
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        loadStats();
+
+        // Logout function
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Strict';
+                window.location.href = '/';
+            }
+        }
+
+        function showAlert(message, type = 'error') {
+            const alert = document.getElementById('profileAlert');
+            alert.className = `rounded-lg p-4 mb-4 ${type === 'error' ? 'bg-red-50 text-red-800' : 'bg-green-50 text-green-800'}`;
+            alert.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'} mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            alert.classList.remove('hidden');
+            
+            setTimeout(() => {
+                alert.classList.add('hidden');
+            }, 5000);
+        }
+
+        // Update profile
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value.trim();
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            
+            if (!name) {
+                showAlert('Name cannot be empty');
+                return;
+            }
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Saving...';
+            
+            try {
+                const response = await fetch('/api/user/update', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ name })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Update localStorage
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    showAlert('Profile updated successfully!', 'success');
+                    
+                    // Update display
+                    document.getElementById('userInitial').textContent = name.charAt(0).toUpperCase();
+                } else {
+                    showAlert(data.message || 'Failed to update profile');
+                }
+            } catch (error) {
+                showAlert('An error occurred. Please try again.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-save mr-2"></i>Save Changes';
+            }
+        });
+
+        // Delete account functions
+        function confirmDeleteAccount() {
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+        }
+
+        async function deleteAccount() {
+            try {
+                const response = await fetch('/api/user/delete', {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Strict';
+                    
+                    alert('Your account has been deleted successfully');
+                    window.location.href = '/';
+                } else {
+                    alert(data.message || 'Failed to delete account');
+                    closeDeleteModal();
+                }
+            } catch (error) {
+                alert('An error occurred. Please try again.');
+                closeDeleteModal();
+            }
+        }
+        
+        // Toggle notifications
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notificationDropdown');
+            dropdown.classList.toggle('show');
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('notificationDropdown');
+            const notificationBtn = event.target.closest('button[onclick="toggleNotifications()"]');
+            
+            if (!notificationBtn && !dropdown.contains(event.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>

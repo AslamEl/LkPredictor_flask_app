@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LkPredictor - AI-Powered Price Predictions for Sri Lanka</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(70px);
+            mix-blend-mode: multiply;
+            animation: blob 7s infinite;
+        }
+        
+        @keyframes blob {
+            0%, 100% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+        
+        .feature-icon {
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover .feature-icon {
+            transform: scale(1.2) rotate(5deg);
+        }
+        
+        /* Enhanced Animations */
+        .fade-in {
+            animation: fadeIn 1s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .slide-in-left {
+            animation: slideInLeft 0.8s ease-out;
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .slide-in-right {
+            animation: slideInRight 0.8s ease-out;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .slide-in-up {
+            animation: slideInUp 0.8s ease-out;
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .scale-in {
+            animation: scaleIn 0.6s ease-out;
+        }
+        
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .pulse-slow {
+            animation: pulseSlow 3s ease-in-out infinite;
+        }
+        
+        @keyframes pulseSlow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* Stagger animation delays */
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.2s; }
+        .stagger-3 { animation-delay: 0.3s; }
+        .stagger-4 { animation-delay: 0.4s; }
+        .stagger-5 { animation-delay: 0.5s; }
+        .stagger-6 { animation-delay: 0.6s; }
+        
+        /* Scroll reveal animation */
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+        
+        .scroll-reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="fixed w-full bg-white/90 backdrop-blur-md z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <i class="fas fa-chart-line text-3xl gradient-text"></i>
+                    <span class="ml-2 text-2xl font-bold gradient-text">LkPredictor</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#features" class="text-gray-700 hover:text-purple-600 transition">Features</a>
+                    <a href="#predictors" class="text-gray-700 hover:text-purple-600 transition">Predictors</a>
+                    <a href="#how-it-works" class="text-gray-700 hover:text-purple-600 transition">How It Works</a>
+                    <a href="#about" class="text-gray-700 hover:text-purple-600 transition">About</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/login" class="text-gray-700 hover:text-purple-600 font-medium transition">Login</a>
+                    <a href="/signup" class="gradient-bg text-white px-6 py-2 rounded-full font-medium hover:opacity-90 transition">
+                        Get Started
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative pt-32 pb-20 overflow-hidden">
+        <!-- Background Blobs -->
+        <div class="blob w-96 h-96 bg-purple-300 absolute top-0 -left-48 opacity-70"></div>
+        <div class="blob w-96 h-96 bg-blue-300 absolute top-0 -right-48 opacity-70" style="animation-delay: 2s"></div>
+        <div class="blob w-96 h-96 bg-pink-300 absolute bottom-0 left-1/2 opacity-70" style="animation-delay: 4s"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="slide-in-left">
+                    <h1 class="text-5xl md:text-6xl font-bold text-gray-900 leading-tight mb-6">
+                        Predict Prices with
+                        <span class="gradient-text">AI Precision</span>
+                    </h1>
+                    <p class="text-xl text-gray-600 mb-8">
+                        Harness the power of machine learning to get accurate price predictions for houses, cars, and health assessments in Sri Lanka. Make informed decisions with confidence.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <a href="/signup" class="gradient-bg text-white px-8 py-4 rounded-full font-semibold text-center hover:opacity-90 transition inline-flex items-center justify-center pulse-slow">
+                            Start Predicting Now
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                        <a href="#how-it-works" class="bg-white text-purple-600 border-2 border-purple-600 px-8 py-4 rounded-full font-semibold text-center hover:bg-purple-50 transition inline-flex items-center justify-center">
+                            Learn More
+                            <i class="fas fa-play-circle ml-2"></i>
+                        </a>
+                    </div>
+                    <div class="mt-8 flex items-center space-x-8">
+                        <div class="scale-in stagger-1">
+                            <div class="text-3xl font-bold text-gray-900">10K+</div>
+                            <div class="text-gray-600">Predictions Made</div>
+                        </div>
+                        <div class="scale-in stagger-2">
+                            <div class="text-3xl font-bold text-gray-900">98%</div>
+                            <div class="text-gray-600">Accuracy Rate</div>
+                        </div>
+                        <div class="scale-in stagger-3">
+                            <div class="text-3xl font-bold text-gray-900">5K+</div>
+                            <div class="text-gray-600">Happy Users</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative slide-in-right">
+                    <div class="animate-float">
+                        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop" alt="Analytics" class="rounded-2xl shadow-2xl">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 scroll-reveal">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Why Choose LkPredictor?</h2>
+                <p class="text-xl text-gray-600">Cutting-edge features that make predictions effortless</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="feature-card p-8 bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl card-hover scroll-reveal stagger-1">
+                    <div class="feature-icon w-16 h-16 gradient-bg rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-brain text-3xl text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">AI-Powered</h3>
+                    <p class="text-gray-600">Advanced machine learning algorithms trained on thousands of data points for maximum accuracy.</p>
+                </div>
+                <div class="feature-card p-8 bg-gradient-to-br from-pink-50 to-purple-50 rounded-2xl card-hover scroll-reveal stagger-2">
+                    <div class="feature-icon w-16 h-16 gradient-bg rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-bolt text-3xl text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Instant Results</h3>
+                    <p class="text-gray-600">Get your predictions in seconds. No waiting, no hassle - just instant, accurate results.</p>
+                </div>
+                <div class="feature-card p-8 bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl card-hover scroll-reveal stagger-3">
+                    <div class="feature-icon w-16 h-16 gradient-bg rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-shield-alt text-3xl text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Secure & Private</h3>
+                    <p class="text-gray-600">Your data is encrypted and protected. We take your privacy seriously with enterprise-grade security.</p>
+                </div>
+                <div class="feature-card p-8 bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl card-hover scroll-reveal stagger-4">
+                    <div class="feature-icon w-16 h-16 gradient-bg rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-chart-line text-3xl text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Real-Time Data</h3>
+                    <p class="text-gray-600">Our models are continuously updated with the latest market data for the most accurate predictions.</p>
+                </div>
+                <div class="feature-card p-8 bg-gradient-to-br from-yellow-50 to-pink-50 rounded-2xl card-hover scroll-reveal stagger-5">
+                    <div class="feature-icon w-16 h-16 gradient-bg rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-mobile-alt text-3xl text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Mobile Friendly</h3>
+                    <p class="text-gray-600">Access predictions anywhere, anytime from any device. Fully responsive design.</p>
+                </div>
+                <div class="feature-card p-8 bg-gradient-to-br from-red-50 to-purple-50 rounded-2xl card-hover scroll-reveal stagger-6">
+                    <div class="feature-icon w-16 h-16 gradient-bg rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-users text-3xl text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Expert Support</h3>
+                    <p class="text-gray-600">24/7 customer support to help you make the best decisions with our platform.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Predictors Section -->
+    <section id="predictors" class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 scroll-reveal">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Our Prediction Services</h2>
+                <p class="text-xl text-gray-600">Choose from our growing collection of AI-powered predictors</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden card-hover scroll-reveal stagger-1">
+                    <div class="h-48 bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
+                        <i class="fas fa-home text-white text-6xl"></i>
+                    </div>
+                    <div class="p-8">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-4">House Price Predictor</h3>
+                        <p class="text-gray-600 mb-6">Get accurate predictions for residential property prices across Sri Lanka based on location, size, and features.</p>
+                        <ul class="space-y-2 mb-6">
+                            <li class="flex items-center text-gray-700">
+                                <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                Multiple location support
+                            </li>
+                            <li class="flex items-center text-gray-700">
+                                <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                Real-time market analysis
+                            </li>
+                            <li class="flex items-center text-gray-700">
+                                <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                Detailed price breakdown
+                            </li>
+                        </ul>
+                        <a href="/signup" class="gradient-bg text-white px-6 py-3 rounded-full font-semibold hover:opacity-90 transition inline-block">
+                            Try Now
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden card-hover scroll-reveal stagger-2">
+                    <div class="h-48 bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center">
+                        <i class="fas fa-heartbeat text-white text-6xl"></i>
+                    </div>
+                    <div class="p-8">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-4">Diabetes Risk Predictor</h3>
+                        <p class="text-gray-600 mb-6">Assess your diabetes risk based on CDC BRFSS health indicators and lifestyle factors for early prevention.</p>
+                        <ul class="space-y-2 mb-6">
+                            <li class="flex items-center text-gray-700">
+                                <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                CDC-based health assessment
+                            </li>
+                            <li class="flex items-center text-gray-700">
+                                <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                21 health indicators analysis
+                            </li>
+                            <li class="flex items-center text-gray-700">
+                                <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                Personalized recommendations
+                            </li>
+                        </ul>
+                        <a href="/signup" class="gradient-bg text-white px-6 py-3 rounded-full font-semibold hover:opacity-90 transition inline-block">
+                            Check Risk
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden opacity-75 scroll-reveal stagger-3">
+                    <div class="h-48 bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center">
+                        <i class="fas fa-car text-white text-6xl"></i>
+                    </div>
+                    <div class="p-8">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-4">Car Price Predictor</h3>
+                        <p class="text-gray-600 mb-6">Coming soon! Predict vehicle values based on make, model, year, condition, and market trends.</p>
+                        <ul class="space-y-2 mb-6">
+                            <li class="flex items-center text-gray-700">
+                                <i class="fas fa-clock text-gray-400 mr-2"></i>
+                                Multi-brand support
+                            </li>
+                            <li class="flex items-center text-gray-700">
+                                <i class="fas fa-clock text-gray-400 mr-2"></i>
+                                Condition-based pricing
+                            </li>
+                            <li class="flex items-center text-gray-700">
+                                <i class="fas fa-clock text-gray-400 mr-2"></i>
+                                Market trend analysis
+                            </li>
+                        </ul>
+                        <button class="bg-gray-300 text-gray-600 px-6 py-3 rounded-full font-semibold cursor-not-allowed inline-block">
+                            Coming Soon
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 scroll-reveal">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
+                <p class="text-xl text-gray-600">Get predictions in three simple steps</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="text-center scroll-reveal stagger-1">
+                    <div class="w-20 h-20 gradient-bg rounded-full flex items-center justify-center mx-auto mb-6">
+                        <span class="text-3xl font-bold text-white">1</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Create Account</h3>
+                    <p class="text-gray-600">Sign up in seconds with just your email. No credit card required to get started.</p>
+                </div>
+                <div class="text-center scroll-reveal stagger-2">
+                    <div class="w-20 h-20 gradient-bg rounded-full flex items-center justify-center mx-auto mb-6">
+                        <span class="text-3xl font-bold text-white">2</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Enter Details</h3>
+                    <p class="text-gray-600">Fill in the simple form with property, health, or vehicle details. Takes less than a minute.</p>
+                </div>
+                <div class="text-center scroll-reveal stagger-3">
+                    <div class="w-20 h-20 gradient-bg rounded-full flex items-center justify-center mx-auto mb-6">
+                        <span class="text-3xl font-bold text-white">3</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Get Results</h3>
+                    <p class="text-gray-600">Receive instant, AI-powered predictions with detailed insights and recommendations.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 gradient-bg relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute w-96 h-96 bg-white rounded-full -top-48 -left-48 animate-float"></div>
+            <div class="absolute w-96 h-96 bg-white rounded-full -bottom-48 -right-48 animate-float" style="animation-delay: 1.5s;"></div>
+        </div>
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 scroll-reveal">
+            <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">Ready to Make Smarter Decisions?</h2>
+            <p class="text-xl text-white/90 mb-8">Join thousands of users who trust LkPredictor for accurate predictions</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="/signup" class="bg-white text-purple-600 px-8 py-4 rounded-full font-semibold hover:bg-gray-100 transition inline-flex items-center justify-center scale-in stagger-1">
+                    Get Started Free
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+                <a href="/login" class="bg-transparent border-2 border-white text-white px-8 py-4 rounded-full font-semibold hover:bg-white/10 transition inline-flex items-center justify-center scale-in stagger-2">
+                    Sign In
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-chart-line text-3xl text-purple-400"></i>
+                        <span class="ml-2 text-2xl font-bold">LkPredictor</span>
+                    </div>
+                    <p class="text-gray-400">AI-powered price predictions for Sri Lanka</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Product</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#features" class="text-gray-400 hover:text-white transition">Features</a></li>
+                        <li><a href="#predictors" class="text-gray-400 hover:text-white transition">Predictors</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Pricing</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Company</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#about" class="text-gray-400 hover:text-white transition">About</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Blog</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Legal</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Privacy</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Terms</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Security</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 LkPredictor. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+        
+        // Scroll reveal animation that works every time
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // Add active class when element enters viewport
+                    entry.target.classList.add('active');
+                } else {
+                    // Remove active class when element leaves viewport
+                    entry.target.classList.remove('active');
+                }
+            });
+        }, observerOptions);
+        
+        // Observe all elements with scroll-reveal class
+        document.querySelectorAll('.scroll-reveal').forEach(el => {
+            observer.observe(el);
+        });
+        
+        // Add parallax effect to hero blobs
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const blobs = document.querySelectorAll('.blob');
+            blobs.forEach((blob, index) => {
+                const speed = 0.5 + (index * 0.1);
+                blob.style.transform = `translateY(${scrolled * speed}px)`;
+            });
+        });
+    </script>
+</body>
+</html>

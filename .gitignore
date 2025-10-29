@@ -1,0 +1,41 @@
+*.pyc
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+
+# CSV datasets (available on Kaggle)
+*.csv
+
+# Virtual Environment
+venv/
+env/
+ENV/
+# Ignore saved models
+*.ipynb
+*.joblib
+*.Jupyter
+
+# Environment variables
+.env
+.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Model files (too large for GitHub - host separately)
+*.pkl
+
+# Database
+*.db
+*.sqlite
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

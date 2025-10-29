@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House Price Predictor - LkPredictor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .input-focus:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .result-animation {
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .sidebar-link {
+            transition: all 0.2s ease;
+        }
+        
+        .sidebar-link:hover {
+            background-color: rgba(102, 126, 234, 0.1);
+        }
+        
+        .sidebar-link.active {
+            background-color: rgba(102, 126, 234, 0.2);
+            border-left: 4px solid #667eea;
+        }
+        
+        .notification-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            margin-top: 0.5rem;
+            width: 320px;
+            max-height: 400px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            z-index: 50;
+        }
+        
+        .notification-dropdown.show {
+            display: block;
+        }
+        
+        @keyframes slide-in {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .animate-slide-in {
+            animation: slide-in 0.3s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg hidden md:block">
+            <div class="p-6 border-b">
+                <a href="/dashboard" class="flex items-center hover:opacity-80 transition cursor-pointer">
+                    <i class="fas fa-chart-line text-3xl text-purple-600"></i>
+                    <span class="ml-3 text-3xl font-bold text-gray-900">LkPredictor</span>
+                </a>
+            </div>
+            <nav class="p-4">
+                <a href="/dashboard" class="sidebar-link flex items-center p-3 rounded-lg mb-2">
+                    <i class="fas fa-th-large w-6"></i>
+                    <span class="ml-3 font-medium">Dashboard</span>
+                </a>
+                <a href="/house-predictor" class="sidebar-link active flex items-center p-3 rounded-lg mb-2">
+                    <i class="fas fa-home w-6"></i>
+                    <span class="ml-3 font-medium">House Predictor</span>
+                </a>
+                <a href="/diabetes-predictor" class="sidebar-link flex items-center p-3 rounded-lg mb-2">
+                    <i class="fas fa-heartbeat w-6"></i>
+                    <span class="ml-3 font-medium">Diabetes Check</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center p-3 rounded-lg mb-2 opacity-50 cursor-not-allowed">
+                    <i class="fas fa-car w-6"></i>
+                    <span class="ml-3 font-medium">Car Predictor</span>
+                    <span class="ml-auto text-xs bg-gray-200 px-2 py-1 rounded">Soon</span>
+                </a>
+                <div class="border-t my-4"></div>
+                <a href="/history" class="sidebar-link flex items-center p-3 rounded-lg mb-2">
+                    <i class="fas fa-history w-6"></i>
+                    <span class="ml-3 font-medium">History</span>
+                </a>
+                <a href="/settings" class="sidebar-link flex items-center p-3 rounded-lg mb-2">
+                    <i class="fas fa-cog w-6"></i>
+                    <span class="ml-3 font-medium">Settings</span>
+                </a>
+                <a href="#" onclick="logout()" class="sidebar-link flex items-center p-3 rounded-lg mb-2 text-red-600">
+                    <i class="fas fa-sign-out-alt w-6"></i>
+                    <span class="ml-3 font-medium">Logout</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="bg-white shadow-sm z-10">
+                <div class="px-6 py-4 flex justify-between items-center">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">House Price Predictor</h1>
+                        <p class="text-gray-600">Get accurate predictions for Sri Lankan properties</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <button onclick="toggleNotifications()" class="relative p-2 text-gray-600 hover:text-gray-900 transition">
+                                <i class="fas fa-bell text-xl"></i>
+                                <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+                            </button>
+                            
+                            <!-- Notification Dropdown -->
+                            <div id="notificationDropdown" class="notification-dropdown">
+                                <div class="p-4 border-b bg-gray-50">
+                                    <h3 class="font-semibold text-gray-900">Notifications</h3>
+                                </div>
+                                <div class="p-4">
+                                    <div class="space-y-3">
+                                        <!-- Sample notification -->
+                                        <div class="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg transition">
+                                            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                                <i class="fas fa-home text-purple-600"></i>
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm text-gray-900">Ready to predict!</p>
+                                                <p class="text-xs text-gray-500 mt-1">Fill in the form to get started</p>
+                                                <p class="text-xs text-gray-400 mt-1">Just now</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-3 border-t bg-gray-50 text-center">
+                                    <a href="#" class="text-sm text-purple-600 hover:text-purple-700 font-medium">View all notifications</a>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="/settings" class="flex items-center hover:opacity-80 transition cursor-pointer">
+                            <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center text-white font-bold">
+                                <span id="userInitial">U</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="flex-1 overflow-y-auto p-6">
+                <div class="max-w-7xl mx-auto">
+                    <div class="grid lg:grid-cols-2 gap-8">
+                        <!-- Input Form -->
+                        <div class="bg-white rounded-xl shadow-lg p-8">
+                            <div class="mb-6">
+                                <h2 class="text-2xl font-bold text-gray-900 mb-2">Property Details</h2>
+                                <p class="text-gray-600">Enter the property information to get a price prediction</p>
+                            </div>
+
+                            <form id="predictionForm" class="space-y-6">
+                                <!-- Square Footage -->
+                                <div>
+                                    <label for="squareFootage" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Square Footage (sq ft)
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-ruler-combined text-gray-400"></i>
+                                        </div>
+                                        <input
+                                            type="number"
+                                            id="squareFootage"
+                                            name="SquareFootage"
+                                            required
+                                            min="100"
+                                            max="10000"
+                                            class="input-focus appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none transition"
+                                            placeholder="e.g., 1500"
+                                        >
+                                    </div>
+                                    <p class="mt-1 text-xs text-gray-500">Enter the total living space in square feet</p>
+                                </div>
+
+                                <!-- Bedrooms -->
+                                <div>
+                                    <label for="bedrooms" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Number of Bedrooms
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-bed text-gray-400"></i>
+                                        </div>
+                                        <input
+                                            type="number"
+                                            id="bedrooms"
+                                            name="Bedrooms"
+                                            required
+                                            min="1"
+                                            max="10"
+                                            class="input-focus appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none transition"
+                                            placeholder="e.g., 3"
+                                        >
+                                    </div>
+                                    <p class="mt-1 text-xs text-gray-500">Total number of bedrooms in the property</p>
+                                </div>
+
+                                <!-- Location -->
+                                <div>
+                                    <label for="location" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Location Type
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-map-marker-alt text-gray-400"></i>
+                                        </div>
+                                        <select
+                                            id="location"
+                                            name="Location"
+                                            required
+                                            class="input-focus appearance-none block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none transition bg-white"
+                                        >
+                                            <option value="">Select location type...</option>
+                                            <option value="Urban">Urban - City center and metropolitan areas</option>
+                                            <option value="Suburb">Suburb - Residential areas near cities</option>
+                                            <option value="Rural">Rural - Countryside and remote areas</option>
+                                        </select>
+                                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-chevron-down text-gray-400"></i>
+                                        </div>
+                                    </div>
+                                    <p class="mt-1 text-xs text-gray-500">Select the area classification</p>
+                                </div>
+
+                                <!-- Submit Button -->
+                                <div class="pt-4">
+                                    <button
+                                        type="submit"
+                                        class="w-full gradient-bg text-white py-4 px-6 rounded-lg font-semibold hover:opacity-90 transition flex items-center justify-center"
+                                    >
+                                        <i class="fas fa-calculator mr-2"></i>
+                                        Calculate Price
+                                    </button>
+                                </div>
+
+                                <!-- Reset Button -->
+                                <button
+                                    type="button"
+                                    onclick="resetForm()"
+                                    class="w-full bg-gray-200 text-gray-700 py-3 px-6 rounded-lg font-semibold hover:bg-gray-300 transition"
+                                >
+                                    <i class="fas fa-redo mr-2"></i>
+                                    Reset Form
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Results Panel -->
+                        <div>
+                            <!-- Info Card -->
+                            <div id="infoCard" class="bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl shadow-lg p-8 text-white mb-6">
+                                <div class="flex items-center mb-4">
+                                    <i class="fas fa-info-circle text-3xl mr-3"></i>
+                                    <h3 class="text-2xl font-bold">How It Works</h3>
+                                </div>
+                                <ul class="space-y-3">
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle mt-1 mr-2"></i>
+                                        <span>Enter your property details accurately</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle mt-1 mr-2"></i>
+                                        <span>Our AI analyzes thousands of data points</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle mt-1 mr-2"></i>
+                                        <span>Get instant, accurate price predictions</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle mt-1 mr-2"></i>
+                                        <span>98% accuracy based on real market data</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- Results Card -->
+                            <div id="resultsCard" class="hidden bg-white rounded-xl shadow-lg p-8 result-animation">
+                                <div class="text-center mb-6">
+                                    <i class="fas fa-home text-6xl text-purple-600 mb-4"></i>
+                                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Predicted Price</h3>
+                                </div>
+
+                                <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg p-6 mb-6">
+                                    <div class="text-center">
+                                        <div class="text-sm text-gray-600 mb-2">Estimated Value</div>
+                                        <div id="predictedPrice" class="text-4xl font-bold text-purple-600 mb-2">
+                                            LKR 0.00
+                                        </div>
+                                        <div class="text-sm text-gray-500">Sri Lankan Rupees</div>
+                                    </div>
+                                </div>
+
+                                <!-- Property Summary -->
+                                <div class="border-t pt-6">
+                                    <h4 class="font-semibold text-gray-900 mb-4">Property Summary</h4>
+                                    <div class="space-y-3">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-600">
+                                                <i class="fas fa-ruler-combined w-5"></i> Square Footage
+                                            </span>
+                                            <span id="summarySquareFootage" class="font-semibold">-</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-600">
+                                                <i class="fas fa-bed w-5"></i> Bedrooms
+                                            </span>
+                                            <span id="summaryBedrooms" class="font-semibold">-</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-600">
+                                                <i class="fas fa-map-marker-alt w-5"></i> Location Type
+                                            </span>
+                                            <span id="summaryLocation" class="font-semibold">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="border-t pt-6 mt-6">
+                                    <button onclick="sharePrediction()" class="w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 transition">
+                                        <i class="fas fa-share-alt mr-2"></i>Share
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Loading Card -->
+                            <div id="loadingCard" class="hidden bg-white rounded-xl shadow-lg p-8">
+                                <div class="text-center">
+                                    <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Analyzing Property...</h3>
+                                    <p class="text-gray-600">Our AI is processing your data</p>
+                                </div>
+                            </div>
+
+                            <!-- Error Card -->
+                            <div id="errorCard" class="hidden bg-red-50 rounded-xl shadow-lg p-8 result-animation">
+                                <div class="text-center">
+                                    <i class="fas fa-exclamation-circle text-6xl text-red-500 mb-4"></i>
+                                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Prediction Failed</h3>
+                                    <p id="errorMessage" class="text-gray-600 mb-4">An error occurred. Please try again.</p>
+                                    <button onclick="resetForm()" class="bg-red-600 text-white py-2 px-6 rounded-lg hover:bg-red-700 transition">
+                                        Try Again
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Load user info
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (user.name) {
+            document.getElementById('userInitial').textContent = user.name.charAt(0).toUpperCase();
+        }
+
+        // Check authentication
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login';
+        }
+
+        // Store current prediction data
+        let currentPrediction = null;
+
+        // Form submission
+        document.getElementById('predictionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const squareFootage = document.getElementById('squareFootage').value;
+            const bedrooms = document.getElementById('bedrooms').value;
+            const location = document.getElementById('location').value;
+            
+            // Hide all result cards
+            document.getElementById('infoCard').classList.add('hidden');
+            document.getElementById('resultsCard').classList.add('hidden');
+            document.getElementById('errorCard').classList.add('hidden');
+            document.getElementById('loadingCard').classList.remove('hidden');
+            
+            try {
+                const response = await fetch('/api/predict/house', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        SquareFootage: parseFloat(squareFootage),
+                        Bedrooms: parseInt(bedrooms),
+                        Location: location
+                    })
+                });
+                
+                const data = await response.json();
+                
+                document.getElementById('loadingCard').classList.add('hidden');
+                
+                if (data.success) {
+                    // Store prediction data
+                    currentPrediction = {
+                        squareFootage: squareFootage,
+                        bedrooms: bedrooms,
+                        location: location,
+                        predictedPrice: data.prediction,
+                        formattedPrice: data.formatted_price,
+                        predictionId: data.prediction_id
+                    };
+                    
+                    // Display results
+                    document.getElementById('predictedPrice').textContent = data.formatted_price;
+                    document.getElementById('summarySquareFootage').textContent = squareFootage + ' sq ft';
+                    document.getElementById('summaryBedrooms').textContent = bedrooms;
+                    document.getElementById('summaryLocation').textContent = location;
+                    document.getElementById('resultsCard').classList.remove('hidden');
+                } else {
+                    // Display error
+                    document.getElementById('errorMessage').textContent = data.message || 'An error occurred. Please try again.';
+                    document.getElementById('errorCard').classList.remove('hidden');
+                }
+            } catch (error) {
+                document.getElementById('loadingCard').classList.add('hidden');
+                document.getElementById('errorMessage').textContent = 'Failed to connect to the server. Please try again.';
+                document.getElementById('errorCard').classList.remove('hidden');
+            }
+        });
+
+        function resetForm() {
+            document.getElementById('predictionForm').reset();
+            document.getElementById('infoCard').classList.remove('hidden');
+            document.getElementById('resultsCard').classList.add('hidden');
+            document.getElementById('errorCard').classList.add('hidden');
+            document.getElementById('loadingCard').classList.add('hidden');
+            currentPrediction = null;
+        }
+
+        // Save prediction (download as image directly)
+        async function savePrediction() {
+            if (!currentPrediction) {
+                alert('No prediction to save');
+                return;
+            }
+            
+            const saveBtn = document.getElementById('saveBtn');
+            const originalContent = saveBtn.innerHTML;
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Saving...';
+            
+            try {
+                // Load html2canvas if not already loaded
+                if (typeof html2canvas === 'undefined') {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+                    document.head.appendChild(script);
+                    
+                    await new Promise((resolve, reject) => {
+                        script.onload = resolve;
+                        script.onerror = reject;
+                    });
+                }
+                
+                // Get the results card element
+                const resultsCard = document.getElementById('resultsCard');
+                if (!resultsCard) {
+                    throw new Error('Results card not found');
+                }
+                
+                // Temporarily enhance visibility for capture
+                const originalOpacity = resultsCard.style.opacity;
+                resultsCard.style.opacity = '1';
+                
+                // Generate canvas from the results card with better quality settings
+                const canvas = await html2canvas(resultsCard, {
+                    scale: 3, // Higher scale for better quality
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    useCORS: true,
+                    allowTaint: true,
+                    windowWidth: resultsCard.scrollWidth,
+                    windowHeight: resultsCard.scrollHeight,
+                    imageTimeout: 0,
+                    removeContainer: true
+                });
+                
+                // Restore original opacity
+                resultsCard.style.opacity = originalOpacity;
+                
+                // Convert to blob and download with higher quality
+                canvas.toBlob((blob) => {
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.download = `house-prediction-${Date.now()}.png`;
+                    link.href = url;
+                    link.click();
+                    URL.revokeObjectURL(url);
+                    
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Saved!';
+                    showNotification('Success!', 'Prediction image downloaded', 'success');
+                    
+                    setTimeout(() => {
+                        saveBtn.innerHTML = originalContent;
+                    }, 2000);
+                }, 'image/png', 1.0); // Maximum quality
+                
+            } catch (error) {
+                console.error('Error saving image:', error);
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = originalContent;
+                showNotification('Error', 'Failed to save image. Please try again.', 'error');
+            }
+        }
+
+        // Share prediction
+        function sharePrediction() {
+            if (!currentPrediction) {
+                alert('No prediction to share');
+                return;
+            }
+            
+            const shareText = `🏠 House Price Prediction - LkPredictor\n\n` +
+                `📐 Square Footage: ${currentPrediction.squareFootage} sq ft\n` +
+                `🛏️ Bedrooms: ${currentPrediction.bedrooms}\n` +
+                `📍 Location: ${currentPrediction.location}\n\n` +
+                `💰 Predicted Price: ${currentPrediction.formattedPrice}\n\n` +
+                `Get your own predictions at LkPredictor!`;
+            
+            // Always show the modal for better UX and image download option
+            showShareModal(shareText);
+        }
+
+        // Show share modal with text
+        function showShareModal(text) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-2xl font-bold text-gray-900">Share Prediction</h3>
+                            <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-times text-2xl"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Shareable Card -->
+                        <div id="shareCard" class="bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl p-8 mb-6 text-white">
+                            <div class="text-center mb-6">
+                                <i class="fas fa-home text-6xl mb-4 opacity-90"></i>
+                                <h2 class="text-3xl font-bold mb-2">House Price Prediction</h2>
+                                <p class="text-purple-100">LkPredictor - AI-Powered Property Valuation</p>
+                            </div>
+                            
+                            <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-6 mb-6">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="text-center">
+                                        <i class="fas fa-ruler-combined text-3xl mb-2"></i>
+                                        <p class="text-sm opacity-90">Square Footage</p>
+                                        <p class="text-2xl font-bold">${currentPrediction.squareFootage} sq ft</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <i class="fas fa-bed text-3xl mb-2"></i>
+                                        <p class="text-sm opacity-90">Bedrooms</p>
+                                        <p class="text-2xl font-bold">${currentPrediction.bedrooms}</p>
+                                    </div>
+                                </div>
+                                <div class="text-center mt-4">
+                                    <i class="fas fa-map-marker-alt text-3xl mb-2"></i>
+                                    <p class="text-sm opacity-90">Location</p>
+                                    <p class="text-2xl font-bold">${currentPrediction.location}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white rounded-lg p-6 text-center">
+                                <p class="text-gray-600 text-sm mb-2">Estimated Value</p>
+                                <p class="text-4xl font-bold text-purple-600 mb-1">${currentPrediction.formattedPrice}</p>
+                                <p class="text-gray-500 text-sm">Sri Lankan Rupees</p>
+                            </div>
+                            
+                            <div class="text-center mt-6 text-sm opacity-90">
+                                <p>Generated on ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <button onclick="downloadAsImage()" class="bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 transition font-semibold">
+                                <i class="fas fa-download mr-2"></i>Save as Image
+                            </button>
+                            <button onclick="copyFromModal()" class="bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition font-semibold">
+                                <i class="fas fa-copy mr-2"></i>Copy Text
+                            </button>
+                        </div>
+                        
+                        <button onclick="this.closest('.fixed').remove()" class="w-full mt-3 bg-gray-200 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-300 transition font-semibold">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // Copy text from modal
+        function copyFromModal() {
+            const shareText = `🏠 House Price Prediction - LkPredictor\n\n` +
+                `📐 Square Footage: ${currentPrediction.squareFootage} sq ft\n` +
+                `🛏️ Bedrooms: ${currentPrediction.bedrooms}\n` +
+                `📍 Location: ${currentPrediction.location}\n\n` +
+                `💰 Predicted Price: ${currentPrediction.formattedPrice}\n\n` +
+                `Get your own predictions at LkPredictor!`;
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(shareText)
+                    .then(() => {
+                        showNotification('Copied!', 'Text copied to clipboard', 'success');
+                    })
+                    .catch((error) => {
+                        console.error('Error copying to clipboard:', error);
+                        alert('Failed to copy to clipboard');
+                    });
+            } else {
+                alert('Clipboard not supported');
+            }
+        }
+
+        // Download as image using html2canvas
+        async function downloadAsImage() {
+            const card = document.getElementById('shareCard');
+            const button = event.target;
+            const originalContent = button.innerHTML;
+            
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating...';
+            
+            try {
+                // Load html2canvas from CDN if not already loaded
+                if (typeof html2canvas === 'undefined') {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+                    document.head.appendChild(script);
+                    
+                    await new Promise((resolve, reject) => {
+                        script.onload = resolve;
+                        script.onerror = reject;
+                    });
+                }
+                
+                // Generate canvas from the card with better quality
+                const canvas = await html2canvas(card, {
+                    backgroundColor: null,
+                    scale: 3, // Higher quality
+                    logging: false,
+                    useCORS: true,
+                    allowTaint: true,
+                    windowWidth: card.scrollWidth,
+                    windowHeight: card.scrollHeight,
+                    imageTimeout: 0,
+                    removeContainer: true
+                });
+                
+                // Convert to blob and download with maximum quality
+                canvas.toBlob((blob) => {
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.download = `house-prediction-${Date.now()}.png`;
+                    link.href = url;
+                    link.click();
+                    URL.revokeObjectURL(url);
+                    
+                    button.disabled = false;
+                    button.innerHTML = originalContent;
+                    showNotification('Success!', 'Image downloaded successfully', 'success');
+                }, 'image/png', 1.0); // Maximum quality
+                
+            } catch (error) {
+                console.error('Error generating image:', error);
+                button.disabled = false;
+                button.innerHTML = originalContent;
+                showNotification('Error', 'Failed to generate image. Please try again.', 'error');
+            }
+        }
+
+        // Show notification
+        function showNotification(title, message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 max-w-sm bg-white rounded-lg shadow-lg p-4 border-l-4 ${
+                type === 'success' ? 'border-green-500' : 
+                type === 'error' ? 'border-red-500' : 
+                'border-blue-500'
+            } animate-slide-in`;
+            
+            notification.innerHTML = `
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-${
+                            type === 'success' ? 'check-circle text-green-500' : 
+                            type === 'error' ? 'exclamation-circle text-red-500' : 
+                            'info-circle text-blue-500'
+                        } text-xl"></i>
+                    </div>
+                    <div class="ml-3 flex-1">
+                        <p class="text-sm font-semibold text-gray-900">${title}</p>
+                        <p class="text-sm text-gray-600 mt-1">${message}</p>
+                    </div>
+                    <button onclick="this.closest('.fixed').remove()" class="ml-3 text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto remove after 4 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 4000);
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Strict';
+                window.location.href = '/';
+            }
+        }
+        
+        // Toggle notifications
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notificationDropdown');
+            dropdown.classList.toggle('show');
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('notificationDropdown');
+            const notificationBtn = event.target.closest('button[onclick="toggleNotifications()"]');
+            
+            if (!notificationBtn && !dropdown.contains(event.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>
